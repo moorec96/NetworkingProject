@@ -5,12 +5,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
+
 public class Client : MonoBehaviour {
     private string playerName;
     private string ID;
     private Socket sock;
     private static string server = "178.128.66.50";
     private int playerNum;
+    private bool isTurn; 
 
     private string joinLobbyHeader = "PUT /api/lobby/join HTTP/1.1\r\nHost: " + server + "\r\nConnection: keep-alive\r\nContent-Length: ";
     private string getGamesListHeader = "GET /api/game/list HTTP/1.1\r\nHost: " + server + "\r\nConnection: keep-alive";
@@ -81,7 +83,7 @@ public class Client : MonoBehaviour {
         }
 
 
-        print(sockRequest);
+        //print(sockRequest);
         sock.Send(dataToSend);
 
         int bytes = 0;
@@ -94,5 +96,17 @@ public class Client : MonoBehaviour {
         }
         while (sock.Available > 0);
         sock.Close();
+    }
+
+    public void sendMove(string move){
+        byte[] jsonFile = Encoding.ASCII.GetBytes(move);
+        sock.Send(jsonFile);
+    }
+
+    public string receiveMove(){
+        string resp = "";
+
+
+        return resp;
     }
 }

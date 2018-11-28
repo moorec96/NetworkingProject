@@ -4,7 +4,15 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class Lobby : MonoBehaviour {
-	// Use this for initialization
+    // Use this for initialization
+
+    private class availableGame
+    {
+        string gameId;
+        string playerName;
+
+    }
+        
 	void Start () {
         
 	}
