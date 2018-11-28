@@ -11,6 +11,7 @@ public class Registration : MonoBehaviour {
     public Text playerName;
     public Client client;
     private static Socket sock;
+    public GameObject regPanel;
 	// Use this for initialization
 	void Start () {
 		
@@ -19,18 +20,27 @@ public class Registration : MonoBehaviour {
     public void registerPlayer()
     {
         client.setPlayerName(playerName.text);
-        print(connectSocket("8a2e7691.ngrok.io", 80));
-
+        string resp = connectSocket("178.128.66.50", 80);
+        int index = resp.IndexOf("\r\n\r\n");
+        index += 4;
+        string id = "";
+        for (int i = index; i < resp.Length; i++)
+        {
+            id += resp[i];
+        }
+                                 
+        client.setID(id);
+        print(id);
+        this.gameObject.SetActive(false);
     }
 
     private string connectSocket(string server, int port)
     {
-        string body = "----------\r\nContent-Disposition: form-data; name=\"name\"\r\n" + client.getPlayerName() + "\r\n---------";
-        print(body);
-        string sockRequest = "PUT /api/users HTTP/1.1\r\nHost: " + server + "\r\nConnection: keep-alive\r\n\r\n" + body;
-                            
+        string body = "----------\r\nContent-Disposition: form-data; name=\"name\"\r\n\r\n" + client.getPlayerName() + "\r\n---------";
+        string sockRequest = "PUT /api/users HTTP/1.1\r\nHost: " + server + "\r\nConnection: keep-alive\r\nContent-Length: " + body.Length + "\r\n\r\n" + body;
+        //print(sockRequest);
         byte[] dataToSend =  Encoding.ASCII.GetBytes(sockRequest);
-        byte[] dataReceived = new byte[256];
+        byte[] dataReceived = new byte[1024];
 
         Socket sock = null;
         IPHostEntry host = Dns.GetHostEntry(server);
@@ -52,19 +62,19 @@ public class Registration : MonoBehaviour {
         }
 
         
-        sock.Send(dataToSend, dataToSend.Length, 0);
+        sock.Send(dataToSend);
 
         int bytes = 0;
-        string page = "Data from server " + server + ":\r\n";
+        string resp = "Data from server " + server + ":\r\n";
 
         do
         {
-            bytes = sock.Receive(dataReceived, dataReceived.Length, 0);
-            page = page + Encoding.ASCII.GetString(dataReceived, 0, bytes);
+            bytes = sock.Receive(dataReceived);
+            resp = resp + Encoding.ASCII.GetString(dataReceived, 0, bytes);
         }
-        while (bytes > 0);
-        
-        return page;
+        while (sock.Available > 0);
+        sock.Close();
+        return resp;
     }
 
 }
