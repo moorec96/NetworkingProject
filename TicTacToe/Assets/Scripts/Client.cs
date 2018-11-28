@@ -10,6 +10,7 @@ public class Client : MonoBehaviour {
     private string ID;
     private Socket sock;
     private static string server = "178.128.66.50";
+    private int playerNum;
 
     private string joinLobbyHeader = "PUT /api/lobby/join HTTP/1.1\r\nHost: " + server + "\r\nConnection: keep-alive\r\nContent-Length: ";
     private string getGamesListHeader = "GET /api/game/list HTTP/1.1\r\nHost: " + server + "\r\nConnection: keep-alive";
@@ -38,6 +39,11 @@ public class Client : MonoBehaviour {
     public void setID(string ID)
     {
         this.ID = ID;
+    }
+
+    public int getPlayerNum()
+    {
+        return playerNum;
     }
 
     public void connectSocket(int input){
