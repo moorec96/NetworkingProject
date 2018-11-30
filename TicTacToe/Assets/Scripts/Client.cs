@@ -12,10 +12,14 @@ public class Client : MonoBehaviour {
     private Socket sock;
     private static string server = "178.128.66.50";
     private int playerNum;
-    private bool isTurn; 
+    private bool isTurn;
+
+    private bool hasCreatedGame;
 
     private string joinLobbyHeader = "PUT /api/lobby/join HTTP/1.1\r\nHost: " + server + "\r\nConnection: keep-alive\r\nContent-Length: ";
     private string getGamesListHeader = "GET /api/game/list HTTP/1.1\r\nHost: " + server + "\r\nConnection: keep-alive";
+
+
 	private void Awake()
 	{
         DontDestroyOnLoad(this);
@@ -26,6 +30,7 @@ public class Client : MonoBehaviour {
         playerName = "";
         ID = "";
         sock = null;
+        hasCreatedGame = false;
 	}
 	
     public void setPlayerName(string playerName)
@@ -52,6 +57,16 @@ public class Client : MonoBehaviour {
         return playerNum;
     }
 
+    public void setHasCreatedGame(bool val)
+    {
+        this.hasCreatedGame = val;
+    }
+
+    public bool getHasCreatedGame()
+    {
+        return hasCreatedGame;
+    }
+
     public void connectSocket(int input){
         Socket sock = SocketFactory.createSocket(server, 80);
 
@@ -69,8 +84,6 @@ public class Client : MonoBehaviour {
             
         }
 
-
-        //print(sockRequest);
         sock.Send(dataToSend);
 
         /*

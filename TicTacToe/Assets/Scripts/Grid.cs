@@ -11,7 +11,7 @@ public class Grid : MonoBehaviour {
 
     private void Start()
     {
-       // client = GameObject.Find("Client").GetComponent<Client>();
+        client = GameObject.Find("Client").GetComponent<Client>();
     }
 
     // Use this for initialization
