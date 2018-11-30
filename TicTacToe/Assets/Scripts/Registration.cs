@@ -42,25 +42,7 @@ public class Registration : MonoBehaviour {
         byte[] dataToSend =  Encoding.ASCII.GetBytes(sockRequest);
         byte[] dataReceived = new byte[1024];
 
-        Socket sock = null;
-        IPHostEntry host = Dns.GetHostEntry(server);
-        foreach (IPAddress addr in host.AddressList)
-        { 
-            IPEndPoint ipe = new IPEndPoint(addr, port);
-            Socket tempSock = new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            tempSock.Connect(ipe);
-            if (tempSock.Connected)
-            {
-                sock = tempSock;
-                break;
-            }
-        }
-
-        if(sock == null)
-        {
-            return "FAILED CONNECTION";
-        }
-
+        Socket sock = SocketFactory.createSocket(server, 80);
         
         sock.Send(dataToSend);
 

@@ -43,30 +43,17 @@ public class Client : MonoBehaviour {
         this.ID = ID;
     }
 
+    public string getID(){
+        return ID;
+    }
+
     public int getPlayerNum()
     {
         return playerNum;
     }
 
     public void connectSocket(int input){
-        Socket sock = null;
-        IPHostEntry host = Dns.GetHostEntry(server);
-        foreach (IPAddress addr in host.AddressList)
-        {
-            IPEndPoint ipe = new IPEndPoint(addr, 80);
-            Socket tempSock = new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            tempSock.Connect(ipe);
-            if (tempSock.Connected)
-            {
-                sock = tempSock;
-                break;
-            }
-        }
-
-        if (sock == null)
-        {
-            return;
-        }
+        Socket sock = SocketFactory.createSocket(server, 80);
 
         string sockRequest = "";
         byte[] dataToSend = Encoding.ASCII.GetBytes(sockRequest);
@@ -86,6 +73,7 @@ public class Client : MonoBehaviour {
         //print(sockRequest);
         sock.Send(dataToSend);
 
+        /*
         int bytes = 0;
         string resp = "Data from server " + server + ":\r\n";
 
@@ -95,7 +83,8 @@ public class Client : MonoBehaviour {
             resp = resp + Encoding.ASCII.GetString(dataReceived, 0, bytes);
         }
         while (sock.Available > 0);
-        sock.Close();
+        //sock.Close();
+        */
     }
 
     public void sendMove(string move){
