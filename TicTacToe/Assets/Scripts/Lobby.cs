@@ -8,13 +8,16 @@ using System.Text;
 using Newtonsoft.Json;
 
 public class Lobby : MonoBehaviour {
-    // Use this for initialization
     private Client client;
-    private ArrayList gamesList;
+    //private ArrayList gamesList;
     private Socket sock;
     private string server = "178.128.66.50";
+    private Dictionary<string, ServerUpdate> gamesDict;
 
-    private class AvailableGame
+    public GameObject gamesPanel;
+    //public GameObject availableGamePrefab;
+
+    private class Game
     {
         string gameId;
         string playerName;
@@ -34,7 +37,7 @@ public class Lobby : MonoBehaviour {
         client = GameObject.Find("ClientObj").GetComponent<Client>();
         sock = SocketFactory.createSocket(server, 80);
         //clearGamesList();
-        //StartCoroutine(retrieveGameList());
+        StartCoroutine(retrieveGameList());
     }
 
     IEnumerator retrieveGameList()
@@ -60,7 +63,25 @@ public class Lobby : MonoBehaviour {
         {
             print("Game : " + i + "\nID: " + updList[i].id + "\nStatus: " + updList[i].status + "Turn: " + updList[i].moves + "\nSize: " + updList[i].size + "\n");
         }
+
+        createGameObjects(updList);
         yield return 0;
+    }
+
+    private void createGameObjects(List<ServerUpdate> updList)
+    {
+        for(int i = 0; i < updList.Capacity; i++)
+        {
+            if(updList[i].status == "LOBBY")
+            {
+                gamesDict.Add(updList[i].users[0], updList[i]);
+                GameObject game = (GameObject)Instantiate(Resources.Load("AvailableGame"));
+                game.transform.SetParent(gamesPanel.transform,false);
+                AvailableGame aGame = game.GetComponent<AvailableGame>();
+                aGame.setGameIDText(updList[i].id);
+                aGame.setHostNameText(updList[i].users[0]);
+            }
+        }
     }
 
     public string parseHTTP(string resp){
@@ -83,9 +104,9 @@ public class Lobby : MonoBehaviour {
         }
     }
 
-    public void joinGame()
+    public void joinGame(Text gameID)
     {
-
+        client.connectSocket(1, gameID.text);
     }
 
     public void clearGamesList()    //For Testing

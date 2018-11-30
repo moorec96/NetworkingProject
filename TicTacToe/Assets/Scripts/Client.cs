@@ -67,7 +67,7 @@ public class Client : MonoBehaviour {
         return hasCreatedGame;
     }
 
-    public void connectSocket(int input){
+    public void connectSocket(int input, string gameID = ""){
         Socket sock = SocketFactory.createSocket(server, 80);
 
         string sockRequest = "";
