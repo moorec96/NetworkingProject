@@ -17,7 +17,7 @@ public class Client : MonoBehaviour {
     private bool hasCreatedGame;
 
     private string joinLobbyHeader = "PUT /api/lobby/join HTTP/1.1\r\nHost: " + server + "\r\nConnection: keep-alive\r\nContent-Length: ";
-    private string getGamesListHeader = "GET /api/game/list HTTP/1.1\r\nHost: " + server + "\r\nConnection: keep-alive";
+    private string joinGameHeader = "POST /api/game/join HTTP/1.1\r\nHost: " + server + "\r\nConnection: keep-alive\r\nContent-Length: ";
 
 
 	private void Awake()
@@ -68,7 +68,7 @@ public class Client : MonoBehaviour {
     }
 
     public void connectSocket(int input, string gameID = ""){
-        Socket sock = SocketFactory.createSocket(server, 80);
+        sock = SocketFactory.createSocket(server, 80);
 
         string sockRequest = "";
         byte[] dataToSend = Encoding.ASCII.GetBytes(sockRequest);
@@ -81,7 +81,10 @@ public class Client : MonoBehaviour {
             sockRequest = joinLobbyHeader + reqBody.Length + "\r\n\r\n" + reqBody;
         }
         else if(input == 1){    //Use socket to connect to game 
-            
+            string body = "----------\r\nContent-Disposition: form-data; name=\"user_id\"\r\n\r\n" + ID +
+                            "\r\n---------" + "----------\r\nContent-Disposition: form-data; name=\"game_id\"\r\n\r\n" + gameID +
+                            "\r\n---------";
+            sockRequest = joinGameHeader + body.Length + "\r\n\r\n" + body;
         }
 
         sock.Send(dataToSend);

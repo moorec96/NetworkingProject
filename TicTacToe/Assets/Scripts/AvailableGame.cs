@@ -2,11 +2,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 public class AvailableGame : MonoBehaviour{
     private string hostName;
     private string gameID;
     public Text gameIDText;
     public Text hostNameText;
+    public Button joinBtn;
+    public Client client;
+
+    public void Start()
+    {
+        client = client = GameObject.Find("ClientObj").GetComponent<Client>();
+        joinBtn.onClick.AddListener(joinGame);
+    }
+
+    public void joinGame()
+    {
+        client.connectSocket(1, gameID);
+        SceneManager.LoadScene("Game");
+    }
 
     public string getGameID()
     {

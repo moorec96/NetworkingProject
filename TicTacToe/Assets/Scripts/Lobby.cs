@@ -12,7 +12,7 @@ public class Lobby : MonoBehaviour {
     //private ArrayList gamesList;
     private Socket sock;
     private string server = "178.128.66.50";
-    private Dictionary<string, ServerUpdate> gamesDict;
+    private Dictionary<string, GameObject> gamesDict;
 
     public GameObject gamesPanel;
     //public GameObject availableGamePrefab;
@@ -36,7 +36,7 @@ public class Lobby : MonoBehaviour {
         
         client = GameObject.Find("ClientObj").GetComponent<Client>();
         sock = SocketFactory.createSocket(server, 80);
-        gamesDict = new Dictionary<string, ServerUpdate>();
+        gamesDict = new Dictionary<string, GameObject>();
         //clearGamesList();
         StartCoroutine(retrieveGameList());
     }
@@ -76,8 +76,9 @@ public class Lobby : MonoBehaviour {
         {
             if(updList[i].status == "LOBBY")
             {
-                gamesDict.Add(updList[i].users[0], updList[i]);
+                
                 GameObject game = (GameObject)Instantiate(Resources.Load("AvailableGame"));
+                gamesDict.Add(updList[i].users[0], game);
                 game.transform.SetParent(gamesPanel.transform,false);
                 AvailableGame aGame = game.GetComponent<AvailableGame>();
                 aGame.setGameIDText(updList[i].id);
@@ -101,7 +102,7 @@ public class Lobby : MonoBehaviour {
 
             byte[] dataToSend = Encoding.ASCII.GetBytes(req);
             sock.Send(dataToSend);
-            StartCoroutine(retrieveGameList());
+            //StartCoroutine(retrieveGameList());
             client.setHasCreatedGame(true);
         }
     }
@@ -116,5 +117,14 @@ public class Lobby : MonoBehaviour {
         string req = "POST /api/clear HTTP/1.1\r\nHost: " + server + "\r\n\r\n";
         byte[] request = Encoding.ASCII.GetBytes(req);
         sock.Send(request);
+    }
+
+    public void refreshLobby()
+    {
+        foreach(string game in gamesDict.Keys){
+            Destroy(gamesDict[game]);
+        }
+        gamesDict.Clear();
+        StartCoroutine(retrieveGameList());
     }
 }
