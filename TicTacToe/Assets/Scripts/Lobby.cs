@@ -23,27 +23,31 @@ public class Lobby : MonoBehaviour {
         string playerName;
     }
 
-    private class ServerUpdate{
+    private class ServerUpdate {
         public string id;
         public List<string> users;
         public string status;
         public List<PlayerMove> moves;
         public string turn;
         public int size;
-        public ServerUpdate(){
-            id = "";
-            users = null;
-            status = "";
-            moves = null;
-            turn = "";
-            size = -1;
-            turn = "";
-        }
+        public string host_name;
     }
-        
-	void Start () {
+
+    private class JoinedGameUdpate{
+        public string type;
+	    public string game_id;
+	    public List<string> users;
+    }
+
+    private bool waitingForResponse = false;
+    private string joinedResp = "";
+    private int joinedBytes = 0;
+    private byte[] joinReceived = new byte[1024];
+
+    void Start () {
         
         client = GameObject.Find("ClientObj").GetComponent<Client>();
+        client.connectSocket();
         sock = SocketFactory.createSocket(server, 80);
         gamesDict = new Dictionary<string, GameObject>();
         //clearGamesList();
@@ -73,8 +77,8 @@ public class Lobby : MonoBehaviour {
         {
             print("Game : " + i + "\nID: " + updList[i].id + "\nStatus: " + updList[i].status + "\nTurn: " + updList[i].turn + "\nSize: " + updList[i].size + "\n");
         }
-
         createGameObjects(updList);
+        //sock.Close();
         yield return 0;
     }
 
@@ -91,7 +95,7 @@ public class Lobby : MonoBehaviour {
                 game.transform.SetParent(gamesPanel.transform,false);
                 AvailableGame aGame = game.GetComponent<AvailableGame>();
                 aGame.setGameIDText(updList[i].id);
-                aGame.setHostNameText(updList[i].users[0]); 
+                aGame.setHostNameText(updList[i].host_name); 
             }
         }
     }
@@ -113,14 +117,31 @@ public class Lobby : MonoBehaviour {
             sock.Send(dataToSend);
             //StartCoroutine(retrieveGameList());
             client.setHasCreatedGame(true);
+            client.setPlayerNum(1);
+
+            string resp = "";
+            int bytes = 0;
+            byte[] dataReceived = new byte[1024];
+            do
+            {
+                bytes = sock.Receive(dataReceived);
+                resp = resp + Encoding.ASCII.GetString(dataReceived, 0, bytes);
+            }
+            while (sock.Available > 0);
+
+            client.setGameID(getGameID(resp));
+            print(resp);
+            print("GameID: " + client.getGameID());
+            waitingForResponse = true;
         }
     }
 
+    /*
     public void joinGame(Text gameID)
     {
-        client.connectSocket(1, gameID.text);
+        client.joinGame(gameID.text);
     }
-
+    */
     public void clearGamesList()    //For Testing
     {
         string req = "POST /api/clear HTTP/1.1\r\nHost: " + server + "\r\n\r\n";
@@ -135,5 +156,56 @@ public class Lobby : MonoBehaviour {
         }
         gamesDict.Clear();
         StartCoroutine(retrieveGameList());
+    }
+
+
+    public string getGameID(string jsonFile)
+    {
+        int index = jsonFile.IndexOf("\r\n\r\n");
+        index += 4;
+        string id = "";
+        for (int i = index; i < jsonFile.Length; i++)
+        {
+            id += jsonFile[i];
+        }
+        return id;
+    }
+    /*
+    public void Update()
+    {
+        if (waitingForResponse)
+        {
+            print("waiting");
+            while (client.getSock().Available > 0)
+            {
+                joinedBytes = client.getSock().Receive(joinReceived);
+                joinedResp = joinedResp + Encoding.ASCII.GetString(joinReceived, 0, joinedBytes);
+                waitingForResponse = false;
+            }
+            if (!waitingForResponse)
+            {
+                JoinedGameUdpate gameJoined = JsonConvert.DeserializeObject<JoinedGameUdpate>(joinedResp);
+                print(gameJoined.game_id);
+            }
+        }
+    }
+    */
+    public void cancelGameCreate()
+    {
+        waitingForResponse = false;
+        client.setGameID("");
+        string req = "DELETE /api/users?id=" + client.getID() + " HTTP/1.1\r\nHost: " + server + "\r\n\r\n";
+        byte[] sockReq = Encoding.ASCII.GetBytes(req);
+        sock.Send(sockReq);
+        gamesDict.Remove(client.getID());
+        string resp = "";
+        int bytes = 0;
+        byte[] dataReceived = new byte[1024];
+        do
+        {
+            bytes = sock.Receive(dataReceived);
+            resp = resp + Encoding.ASCII.GetString(dataReceived, 0, bytes);
+        }
+        while (sock.Available > 0);
     }
 }

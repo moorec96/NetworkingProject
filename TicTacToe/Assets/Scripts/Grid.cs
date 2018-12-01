@@ -8,6 +8,7 @@ public class Grid : MonoBehaviour {
     public static char[,] grid = new char[3,3];
     public Text[] buttonText;
     private Client client;
+    public Button[] gridBtns;
 
     private void Start()
     {
@@ -37,6 +38,7 @@ public class Grid : MonoBehaviour {
         int x = btnNum / 3;
         int y = btnNum % 3 == 0 ? 0 : (btnNum % 3);
         fillGridSpace(1, x, y);
+        toggleGrid(true);
     }
 
     public void convertToJson(char moveType, int x, int y){
@@ -47,5 +49,24 @@ public class Grid : MonoBehaviour {
         string resp = client.receiveMove();
         print(resp);
     }
+
+    public void toggleGrid(bool disable)
+    {
+        if (disable)
+        {
+            for (int i = 0; i < gridBtns.Length; i++)
+            {
+                gridBtns[i].interactable = false;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < gridBtns.Length; i++)
+            {
+                gridBtns[i].interactable = true;
+            }
+        }
+    }
+
 
 }

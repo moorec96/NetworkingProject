@@ -19,7 +19,7 @@ public class AvailableGame : MonoBehaviour{
 
     public void joinGame()
     {
-        client.connectSocket(1, gameID);
+        client.joinGame(gameID);
         SceneManager.LoadScene("Game");
     }
 
@@ -30,7 +30,7 @@ public class AvailableGame : MonoBehaviour{
     public void setGameIDText(string text)
     {
         gameID = text;
-        gameIDText.text = text;
+        gameIDText.text = "GameID: " + text;
     }
 
     public string getHostName()
@@ -40,7 +40,7 @@ public class AvailableGame : MonoBehaviour{
     public void setHostNameText(string text)
     {
         hostName = hostName;
-        hostNameText.text = text;
+        hostNameText.text = "HostName: " + text;
     }
 
 }
