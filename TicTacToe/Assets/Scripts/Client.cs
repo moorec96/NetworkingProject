@@ -106,11 +106,19 @@ public class Client : MonoBehaviour {
     public void sendMove(string move){
         byte[] jsonFile = Encoding.ASCII.GetBytes(move);
         sock.Send(jsonFile);
+        
     }
 
     public string receiveMove(){
         string resp = "";
-
+        int bytes = 0;
+        byte[] dataReceived = new byte[1024];
+        do
+        {
+            bytes = sock.Receive(dataReceived);
+            resp = resp + Encoding.ASCII.GetString(dataReceived, 0, bytes);
+        }
+        while (sock.Available > 0);
 
         return resp;
     }

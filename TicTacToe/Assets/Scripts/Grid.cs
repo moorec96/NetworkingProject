@@ -44,6 +44,7 @@ public class Grid : MonoBehaviour {
         string jsonFile = JsonConvert.SerializeObject(newMove);
         print(jsonFile);
         client.sendMove(jsonFile);
+        string resp = client.receiveMove();
     }
 
 }
