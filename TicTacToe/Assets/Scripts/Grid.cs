@@ -45,6 +45,7 @@ public class Grid : MonoBehaviour {
         print(jsonFile);
         client.sendMove(jsonFile);
         string resp = client.receiveMove();
+        print(resp);
     }
 
 }

@@ -29,7 +29,16 @@ public class Lobby : MonoBehaviour {
         public string status;
         public List<PlayerMove> moves;
         public string turn;
-        public int size; 
+        public int size;
+        public ServerUpdate(){
+            id = "";
+            users = null;
+            status = "";
+            moves = null;
+            turn = "";
+            size = -1;
+            turn = "";
+        }
     }
         
 	void Start () {
@@ -82,7 +91,7 @@ public class Lobby : MonoBehaviour {
                 game.transform.SetParent(gamesPanel.transform,false);
                 AvailableGame aGame = game.GetComponent<AvailableGame>();
                 aGame.setGameIDText(updList[i].id);
-                aGame.setHostNameText(updList[i].users[0]);
+                aGame.setHostNameText(updList[i].users[0]); 
             }
         }
     }
