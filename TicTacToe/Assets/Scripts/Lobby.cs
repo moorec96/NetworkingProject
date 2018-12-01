@@ -36,6 +36,7 @@ public class Lobby : MonoBehaviour {
         
         client = GameObject.Find("ClientObj").GetComponent<Client>();
         sock = SocketFactory.createSocket(server, 80);
+        gamesDict = new Dictionary<string, ServerUpdate>();
         //clearGamesList();
         StartCoroutine(retrieveGameList());
     }
@@ -56,12 +57,12 @@ public class Lobby : MonoBehaviour {
             bytes = sock.Receive(dataReceived);
             resp = resp + Encoding.ASCII.GetString(dataReceived, 0, bytes);
         }
-        print("\n" + resp);
+        print(resp);
         resp = parseHTTP(resp);
         List<ServerUpdate> updList = JsonConvert.DeserializeObject<List<ServerUpdate>>(resp);
-        for(int i = 0; i < updList.Capacity; i++)
+        for(int i = 0; i < updList.Count; i++)
         {
-            print("Game : " + i + "\nID: " + updList[i].id + "\nStatus: " + updList[i].status + "Turn: " + updList[i].moves + "\nSize: " + updList[i].size + "\n");
+            print("Game : " + i + "\nID: " + updList[i].id + "\nStatus: " + updList[i].status + "\nTurn: " + updList[i].turn + "\nSize: " + updList[i].size + "\n");
         }
 
         createGameObjects(updList);
@@ -70,7 +71,8 @@ public class Lobby : MonoBehaviour {
 
     private void createGameObjects(List<ServerUpdate> updList)
     {
-        for(int i = 0; i < updList.Capacity; i++)
+        //print(updList.Capacity);
+        for(int i = 0; i < updList.Count; i++)
         {
             if(updList[i].status == "LOBBY")
             {
