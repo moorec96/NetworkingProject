@@ -47,7 +47,7 @@ public class Lobby : MonoBehaviour {
     void Start () {
         
         client = GameObject.Find("ClientObj").GetComponent<Client>();
-        client.connectSocket();
+        //client.connectSocket();
         sock = SocketFactory.createSocket(server, 80);
         gamesDict = new Dictionary<string, GameObject>();
         //clearGamesList();
@@ -170,15 +170,15 @@ public class Lobby : MonoBehaviour {
         }
         return id;
     }
-    /*
+
     public void Update()
     {
         if (waitingForResponse)
         {
             print("waiting");
-            while (client.getSock().Available > 0)
+            while (sock.Available > 0)
             {
-                joinedBytes = client.getSock().Receive(joinReceived);
+                joinedBytes = sock.Receive(joinReceived);
                 joinedResp = joinedResp + Encoding.ASCII.GetString(joinReceived, 0, joinedBytes);
                 waitingForResponse = false;
             }
@@ -189,7 +189,7 @@ public class Lobby : MonoBehaviour {
             }
         }
     }
-    */
+
     public void cancelGameCreate()
     {
         waitingForResponse = false;

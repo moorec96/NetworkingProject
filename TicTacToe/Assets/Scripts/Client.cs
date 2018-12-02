@@ -33,7 +33,6 @@ public class Client : MonoBehaviour {
         sock = null;
         hasCreatedGame = false;
         gameID = "";
-        sock = SocketFactory.createSocket(server, 80);
     }
 	
     public void setPlayerName(string playerName)
@@ -91,7 +90,7 @@ public class Client : MonoBehaviour {
     }
 
     public void connectSocket(){
-
+        sock = SocketFactory.createSocket(server, 80);
         string sockRequest = "";
         
         byte[] dataReceived = new byte[1024];
