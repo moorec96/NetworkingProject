@@ -20,7 +20,7 @@ public class Registration : MonoBehaviour {
     public void registerPlayer()
     {
         client.setPlayerName(playerName.text);
-        string resp = connectSocket("178.128.66.50", 80);
+        string resp = connectSocket("localhost:9999", 9999);
         int index = resp.IndexOf("\r\n\r\n");
         index += 4;
         string id = "";
@@ -42,7 +42,7 @@ public class Registration : MonoBehaviour {
         byte[] dataToSend =  Encoding.ASCII.GetBytes(sockRequest);
         byte[] dataReceived = new byte[1024];
 
-        Socket sock = SocketFactory.createSocket(server, 80);
+        Socket sock = SocketFactory.createSocket("localhost", 9999);
         
         sock.Send(dataToSend);
 

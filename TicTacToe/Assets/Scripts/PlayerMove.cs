@@ -9,6 +9,7 @@ public class PlayerMove{
     public char move_type;
     public string user_id;
     public string game_id;
+    public bool game_won;
 
     public PlayerMove(int x, int y, char move_type, string user_id, string game_id){
         this.x = x;
@@ -16,5 +17,6 @@ public class PlayerMove{
         this.move_type = move_type;
         this.user_id = user_id;
         this.game_id = game_id;
+        game_won = false;
     }
 }

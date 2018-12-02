@@ -6,12 +6,13 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using Newtonsoft.Json;
+using UnityEngine.SceneManagement;
 
 public class Lobby : MonoBehaviour {
     private Client client;
     //private ArrayList gamesList;
     private Socket sock;
-    private string server = "178.128.66.50";
+    private string server = "localhost:9999";
     private Dictionary<string, GameObject> gamesDict;
 
     public GameObject gamesPanel;
@@ -22,7 +23,7 @@ public class Lobby : MonoBehaviour {
         string gameId;
         string playerName;
     }
-
+    /*
     private class ServerUpdate {
         public string id;
         public List<string> users;
@@ -32,7 +33,7 @@ public class Lobby : MonoBehaviour {
         public int size;
         public string host_name;
     }
-
+*/
     private class JoinedGameUdpate{
         public string type;
 	    public string game_id;
@@ -47,8 +48,7 @@ public class Lobby : MonoBehaviour {
     void Start () {
         
         client = GameObject.Find("ClientObj").GetComponent<Client>();
-        //client.connectSocket();
-        sock = SocketFactory.createSocket(server, 80);
+        client.connectSocket();
         gamesDict = new Dictionary<string, GameObject>();
         //clearGamesList();
         StartCoroutine(retrieveGameList());
@@ -56,6 +56,8 @@ public class Lobby : MonoBehaviour {
 
     IEnumerator retrieveGameList()
     {
+        sock = SocketFactory.createSocket("localhost", 9999);
+        //print("TEst");
         string request = "GET /api/game/list HTTP/1.1\r\nHost: " + server + "\r\n\r\n";
         byte[] byteReq = Encoding.ASCII.GetBytes(request);
         sock.Send(byteReq);
@@ -78,7 +80,7 @@ public class Lobby : MonoBehaviour {
             print("Game : " + i + "\nID: " + updList[i].id + "\nStatus: " + updList[i].status + "\nTurn: " + updList[i].turn + "\nSize: " + updList[i].size + "\n");
         }
         createGameObjects(updList);
-        //sock.Close();
+        sock.Close();
         yield return 0;
     }
 
@@ -110,6 +112,7 @@ public class Lobby : MonoBehaviour {
     {
         if (!client.getHasCreatedGame())
         {
+            sock = SocketFactory.createSocket("localhost", 9999);
             string body = "----------\r\nContent-Disposition: form-data; name=\"user_id\"\r\n\r\n" + client.getID() + "\r\n----------";
             string req = "PUT /api/game HTTP/1.1\r\nHost: " + server + "\r\nConnection: keep-alive\r\nContent-Length: " + body.Length + "\r\n\r\n" + body;
 
@@ -134,6 +137,7 @@ public class Lobby : MonoBehaviour {
             print("GameID: " + client.getGameID());
             waitingForResponse = true;
         }
+        sock.Close();
     }
 
     /*
@@ -175,17 +179,33 @@ public class Lobby : MonoBehaviour {
     {
         if (waitingForResponse)
         {
+            joinedResp = "";
             print("waiting");
-            while (sock.Available > 0)
+            while (client.getSock().Available > 0)
             {
-                joinedBytes = sock.Receive(joinReceived);
+                joinedBytes = client.getSock().Receive(joinReceived);
                 joinedResp = joinedResp + Encoding.ASCII.GetString(joinReceived, 0, joinedBytes);
                 waitingForResponse = false;
             }
             if (!waitingForResponse)
             {
+                print(joinedResp);
                 JoinedGameUdpate gameJoined = JsonConvert.DeserializeObject<JoinedGameUdpate>(joinedResp);
-                print(gameJoined.game_id);
+                switch(gameJoined.type){
+                    case "GAME_JOINED":
+                        if(checkForGameJoined(gameJoined.users)){
+                            SceneManager.LoadScene("Game");
+                        }
+                        break;
+                    case "GAME_CREATED":
+                        print("NEW GAME");
+                        waitingForResponse = true;
+                        break;
+                    default:
+                        print("I dont even know");
+                        break;
+                }
+                //print(gameJoined.game_id);
             }
         }
     }
@@ -207,5 +227,14 @@ public class Lobby : MonoBehaviour {
             resp = resp + Encoding.ASCII.GetString(dataReceived, 0, bytes);
         }
         while (sock.Available > 0);
+    }
+
+    public bool checkForGameJoined(List<string> users){
+        foreach(string user in users){
+            if(user == client.getID()){
+                return true;
+            }
+        }
+        return false;
     }
 }

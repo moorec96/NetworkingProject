@@ -4,17 +4,17 @@ using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-
+using Newtonsoft.Json;
 
 public class Client : MonoBehaviour {
     private string playerName;
     private string ID;
     private Socket sock;
-    private static string server = "178.128.66.50";
+    private static string server = "localhost:9999";
     private int playerNum;
     private bool isTurn;
     private string gameID;
-
+    private PlayerMove playerMove;
     private bool hasCreatedGame;
 
     private string joinLobbyHeader = "PUT /api/lobby/join HTTP/1.1\r\nHost: " + server + "\r\nConnection: keep-alive\r\nContent-Length: ";
@@ -33,6 +33,8 @@ public class Client : MonoBehaviour {
         sock = null;
         hasCreatedGame = false;
         gameID = "";
+        playerMove = null;
+        isTurn = true;
     }
 	
     public void setPlayerName(string playerName)
@@ -89,14 +91,23 @@ public class Client : MonoBehaviour {
         return sock;
     }
 
+    public void setIsTurn(bool isTurn){
+        this.isTurn = isTurn;
+    }
+
+    public bool getIsTurn(){
+        return isTurn;
+    }
+
     public void connectSocket(){
-        sock = SocketFactory.createSocket(server, 80);
+        sock = SocketFactory.createSocket("localhost", 9999);
         string sockRequest = "";
         
         byte[] dataReceived = new byte[1024];
         string reqBody = "----------\r\nContent-Disposition: form-data; name=\"user_id\"\r\n\r\n" + ID + 
                             "\r\n---------";
         sockRequest = joinLobbyHeader + reqBody.Length + "\r\n\r\n" + reqBody;
+
         byte[] dataToSend = Encoding.ASCII.GetBytes(sockRequest);
         sock.Send(dataToSend);
 
@@ -115,21 +126,14 @@ public class Client : MonoBehaviour {
 
     public void joinGame(string gameID)
     {
+        this.gameID = gameID;
         string body = "----------\r\nContent-Disposition: form-data; name=\"user_id\"\r\n\r\n" + ID +
                             "\r\n---------" + "----------\r\nContent-Disposition: form-data; name=\"game_id\"\r\n\r\n" + gameID +
                             "\r\n---------";
         string sockRequest = joinGameHeader + body.Length + "\r\n\r\n" + body;
         byte[] dataToSend = Encoding.ASCII.GetBytes(sockRequest);
         sock.Send(dataToSend);
-    }
-
-    public void sendMove(string move){
-        byte[] jsonFile = Encoding.ASCII.GetBytes(move);
-        sock.Send(jsonFile);
-        isTurn = false;
-    }
-
-    public string receiveMove(){
+        /*
         string resp = "";
         int bytes = 0;
         byte[] dataReceived = new byte[1024];
@@ -139,7 +143,25 @@ public class Client : MonoBehaviour {
             resp = resp + Encoding.ASCII.GetString(dataReceived, 0, bytes);
         }
         while (sock.Available > 0);
+        */
+    }
 
-        return resp;
+    public void sendMove(string move){
+        byte[] jsonFile = Encoding.ASCII.GetBytes(move);
+        sock.Send(jsonFile);
+
+
+        string resp = "";
+        int bytes = 0;
+        byte[] dataReceived = new byte[1024];
+        do
+        {
+            bytes = sock.Receive(dataReceived);
+            resp = resp + Encoding.ASCII.GetString(dataReceived, 0, bytes);
+        }
+        while (sock.Available > 0);
+        isTurn = false;
+        print(resp);
+
     }
 }
