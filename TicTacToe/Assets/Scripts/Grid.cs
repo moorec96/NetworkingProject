@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using UnityEngine.SceneManagement;
 
 public class Grid : MonoBehaviour {
 
@@ -16,6 +17,7 @@ public class Grid : MonoBehaviour {
     public PlayerMove oppMove;
     public Text gameOverText;
     public GameObject gameOverPanel;
+    public GameObject quitPanel;
 
     private void Start()
     {
@@ -24,6 +26,8 @@ public class Grid : MonoBehaviour {
     }
 
     public void getTurn(){
+        client.youWon = false;
+        client.gameOver = false;
         Socket sock = SocketFactory.createSocket("localhost", 9999);
         string req = "GET /api/game?id=" + client.getGameID() + " HTTP/1.1\r\nHost: " + "localhost:9999\r\n\r\n";
         byte[] sockRequest = Encoding.ASCII.GetBytes(req);
@@ -171,7 +175,15 @@ public class Grid : MonoBehaviour {
     }
 
     public void gameCancelled(){
-        print("GAME CANCELLED");
+        quitPanel.SetActive(true);
+    }
+
+    public void leaveGame(){
+        Socket tempSock = SocketFactory.createSocket("localhost", 9999);
+        string req = "DELETE /api/users?id=" + client.getID() + " HTTP/1.1\r\nHost: localhost:9999\r\n\r\n";
+        byte[] dataToSend = Encoding.ASCII.GetBytes(req);
+        tempSock.Send(dataToSend);
+        SceneManager.LoadScene("MainMenu");
     }
 
 }
