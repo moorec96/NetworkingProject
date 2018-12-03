@@ -16,6 +16,8 @@ public class Client : MonoBehaviour {
     private string gameID;
     private PlayerMove playerMove;
     private bool hasCreatedGame;
+    public bool gameOver;
+    public bool youWon;
 
     private string joinLobbyHeader = "PUT /api/lobby/join HTTP/1.1\r\nHost: " + server + "\r\nConnection: keep-alive\r\nContent-Length: ";
     private string joinGameHeader = "POST /api/game/join HTTP/1.1\r\nHost: " + server + "\r\nConnection: keep-alive\r\nContent-Length: ";
@@ -35,6 +37,8 @@ public class Client : MonoBehaviour {
         gameID = "";
         playerMove = null;
         isTurn = true;
+        gameOver = false;
+        youWon = false;
     }
 	
     public void setPlayerName(string playerName)
@@ -126,31 +130,31 @@ public class Client : MonoBehaviour {
 
     public void joinGame(string gameID)
     {
+        Socket tempSock = SocketFactory.createSocket("localhost", 9999);
         this.gameID = gameID;
         string body = "----------\r\nContent-Disposition: form-data; name=\"user_id\"\r\n\r\n" + ID +
                             "\r\n---------" + "----------\r\nContent-Disposition: form-data; name=\"game_id\"\r\n\r\n" + gameID +
                             "\r\n---------";
         string sockRequest = joinGameHeader + body.Length + "\r\n\r\n" + body;
         byte[] dataToSend = Encoding.ASCII.GetBytes(sockRequest);
-        sock.Send(dataToSend);
-        /*
+        tempSock.Send(dataToSend);
+
         string resp = "";
         int bytes = 0;
         byte[] dataReceived = new byte[1024];
         do
         {
-            bytes = sock.Receive(dataReceived);
+            bytes = tempSock.Receive(dataReceived);
             resp = resp + Encoding.ASCII.GetString(dataReceived, 0, bytes);
         }
-        while (sock.Available > 0);
-        */
+        while (tempSock.Available > 0);
+        print("JOINED GAME: " + resp);
+        tempSock.Close();
     }
 
     public void sendMove(string move){
         byte[] jsonFile = Encoding.ASCII.GetBytes(move);
         sock.Send(jsonFile);
-
-
         string resp = "";
         int bytes = 0;
         byte[] dataReceived = new byte[1024];
@@ -160,8 +164,14 @@ public class Client : MonoBehaviour {
             resp = resp + Encoding.ASCII.GetString(dataReceived, 0, bytes);
         }
         while (sock.Available > 0);
+        if(resp.IndexOf("GAME_MOVE") > -1){
+            PlayerMove playerMove = JsonConvert.DeserializeObject<PlayerMove>(resp);
+            gameOver = playerMove.game_won;
+            if(gameOver){
+                youWon = playerMove.user_id == ID;
+            }
+        }
         isTurn = false;
         print(resp);
-
     }
 }

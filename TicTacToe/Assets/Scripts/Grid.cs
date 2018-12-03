@@ -14,6 +14,8 @@ public class Grid : MonoBehaviour {
     private Client client;
     public Button[] gridBtns;
     public PlayerMove oppMove;
+    public Text gameOverText;
+    public GameObject gameOverPanel;
 
     private void Start()
     {
@@ -59,7 +61,7 @@ public class Grid : MonoBehaviour {
     public void fillGridSpace(int playerNum, int x, int y)
     {
         int index = x * 3 == 0 ? y : x * 3 + y;
-        char moveType = playerNum == 1 ? 'X' : 'Y';
+        char moveType = playerNum == 1 ? 'X' : 'O';
         if(playerNum == 1)
         {
             grid[x, y] = moveType;
@@ -70,7 +72,7 @@ public class Grid : MonoBehaviour {
             grid[x, y] = moveType;
             buttonText[index].text = "O";
         }
-        convertToJson(moveType, x, y);
+        gridBtns[index].interactable = false;
     }
 
     public void buttonClicked(int btnNum)
@@ -78,6 +80,7 @@ public class Grid : MonoBehaviour {
         int x = btnNum / 3;
         int y = btnNum % 3 == 0 ? 0 : (btnNum % 3);
         fillGridSpace(client.getPlayerNum(), x, y);
+        convertToJson(grid[x,y], x, y);
         toggleGrid(false);
     }
 
@@ -110,6 +113,9 @@ public class Grid : MonoBehaviour {
     {
         if (!client.getIsTurn())
         {
+            if(client.gameOver){
+                gameWon(client.youWon);
+            }
             int bytes = 0;
             byte[] receivedData = new byte[1024];
             string resp = "";
@@ -118,24 +124,54 @@ public class Grid : MonoBehaviour {
                 bytes = client.getSock().Receive(receivedData);
                 resp = resp + Encoding.ASCII.GetString(receivedData, 0, bytes);
                 client.setIsTurn(true);
+                print("TEST");
             }
-            print(resp);
+            //print(resp);
             if (client.getIsTurn())
             {
-                oppMove = JsonConvert.DeserializeObject<PlayerMove>(resp);
-                if (oppMove.game_won)
+                if (resp.IndexOf("GAME_CANCELLED") > -1)
                 {
-                    gameWon();
+                    gameCancelled();
                 }
-                int oppNum = client.getPlayerNum() == 1 ? 2 : 1;
-                fillGridSpace(oppNum, oppMove.x, oppMove.y);
-                toggleGrid(true);
+                else if(resp.IndexOf("GAME_MOVE") > -1)
+                {
+                    print("RECEIVED MOVE");
+                    oppMove = JsonConvert.DeserializeObject<PlayerMove>(resp);
+                    if (oppMove.game_won)
+                    {
+                        if(oppMove.user_id == client.getID()){
+                            gameWon(true);
+                        }
+                        else{
+                            gameWon(false);
+                        }
+
+                    }
+                    int oppNum = client.getPlayerNum() == 1 ? 2 : 1;
+                    print("Num: " + oppNum + "   X: " + oppMove.x + "   Y: " + oppMove.y);
+                    fillGridSpace(oppNum, oppMove.x, oppMove.y);
+                    toggleGrid(true);
+                }
+                else{
+                    client.setIsTurn(false);
+                }
             }
         }
     }
 
-    public void gameWon(){
-        
+    public void gameWon(bool youWon){
+        gameOverPanel.SetActive(true);
+        if (youWon)
+        {
+            gameOverText.text = "YOU WON";
+        }
+        else{
+            gameOverText.text = "YOU LOST";
+        }
+    }
+
+    public void gameCancelled(){
+        print("GAME CANCELLED");
     }
 
 }
