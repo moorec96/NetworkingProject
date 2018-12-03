@@ -183,7 +183,9 @@ public class Grid : MonoBehaviour {
         string req = "DELETE /api/users?id=" + client.getID() + " HTTP/1.1\r\nHost: localhost:9999\r\n\r\n";
         byte[] dataToSend = Encoding.ASCII.GetBytes(req);
         tempSock.Send(dataToSend);
+        //Destroy(client);
         SceneManager.LoadScene("MainMenu");
+        //Application.Quit();
     }
 
 }

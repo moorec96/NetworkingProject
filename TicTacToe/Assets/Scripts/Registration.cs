@@ -14,7 +14,7 @@ public class Registration : MonoBehaviour {
     public GameObject regPanel;
 	// Use this for initialization
 	void Start () {
-		
+        client = GameObject.Find("ClientObj").GetComponent<Client>();
 	}
 	
     public void registerPlayer()
