@@ -1,4 +1,11 @@
-﻿using System.Collections;
+﻿/**
+ * Class: 
+ * Purpose: 
+ * Author: 
+ * Date: 
+ * */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,6 +18,12 @@ public class PlayerMove{
     public string game_id;
     public bool game_won;
 
+    /**
+     * Method: 
+     * Purpose: 
+     * Parameters: 
+     * Return Val: 
+     * */
     public PlayerMove(int x, int y, char move_type, string user_id, string game_id){
         this.x = x;
         this.y = y;
