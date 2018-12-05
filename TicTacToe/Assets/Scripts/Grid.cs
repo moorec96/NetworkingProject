@@ -21,7 +21,7 @@ public class Grid : MonoBehaviour {
     public Text[] buttonText;
     private Client client;
     public Button[] gridBtns;
-    public bool[] btnsSet;
+    public bool[] btnsSet = new bool[9];
     public PlayerMove oppMove;
     public Text gameOverText;
     public GameObject gameOverPanel;
