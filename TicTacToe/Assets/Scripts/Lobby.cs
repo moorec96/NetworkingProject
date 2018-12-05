@@ -16,6 +16,7 @@ public class Lobby : MonoBehaviour {
     private Dictionary<string, GameObject> gamesDict;
 
     public GameObject gamesPanel;
+    public GameObject loadingPanel;
     //public GameObject availableGamePrefab;
 
     private class Game
@@ -46,9 +47,10 @@ public class Lobby : MonoBehaviour {
     private byte[] joinReceived = new byte[1024];
 
     void Start () {
-        
+        loadingPanel.SetActive(true);
         client = GameObject.Find("ClientObj").GetComponent<Client>();
         client.connectSocket();
+        client.setHasCreatedGame(false);
         gamesDict = new Dictionary<string, GameObject>();
         //clearGamesList();
         StartCoroutine(retrieveGameList());
@@ -81,6 +83,7 @@ public class Lobby : MonoBehaviour {
         }
         createGameObjects(updList);
         sock.Close();
+        loadingPanel.SetActive(false);
         yield return 0;
     }
 
