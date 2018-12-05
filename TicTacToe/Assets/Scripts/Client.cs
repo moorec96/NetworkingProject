@@ -1,4 +1,11 @@
-﻿using System.Collections;
+﻿/**
+ * Class: 
+ * Purpose: 
+ * Author: 
+ * Date: 
+ * */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Net;
@@ -40,7 +47,14 @@ public class Client : MonoBehaviour {
         gameOver = false;
         youWon = false;
     }
-	
+
+
+    /**
+     * Method: 
+     * Purpose: 
+     * Parameters: 
+     * Return Val: 
+     * */
     public void setPlayerName(string playerName)
     {
         this.playerName = playerName;

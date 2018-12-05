@@ -1,4 +1,11 @@
-﻿using System.Collections;
+﻿/**
+ * Class: 
+ * Purpose: 
+ * Author: 
+ * Date: 
+ * */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,6 +32,12 @@ public class Grid : MonoBehaviour {
         getTurn();
     }
 
+    /**
+     * Method: 
+     * Purpose: 
+     * Parameters: 
+     * Return Val: 
+     * */
     public void getTurn(){
         client.youWon = false;
         client.gameOver = false;

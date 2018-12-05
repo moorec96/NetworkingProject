@@ -1,3 +1,10 @@
+/**
+ * Class: 
+ * Purpose: 
+ * Author: 
+ * Date: 
+ * */
+
 using UnityEngine;
 using System.Collections;
 using System.Net;
@@ -5,6 +12,12 @@ using System.Net.Sockets;
 
 public class SocketFactory
 {
+    /**
+     * Method: 
+     * Purpose: 
+     * Parameters: 
+     * Return Val: 
+     * */
     public static Socket createSocket(string server, int port){
         Socket sock = null;
         IPHostEntry host = Dns.GetHostEntry(server);

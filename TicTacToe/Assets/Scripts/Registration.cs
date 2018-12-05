@@ -1,4 +1,11 @@
-﻿using System.Collections;
+﻿/**
+ * Class: 
+ * Purpose: 
+ * Author: 
+ * Date: 
+ * */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,7 +23,13 @@ public class Registration : MonoBehaviour {
 	void Start () {
         client = GameObject.Find("ClientObj").GetComponent<Client>();
 	}
-	
+
+    /**
+     * Method: 
+     * Purpose: 
+     * Parameters: 
+     * Return Val: 
+     * */
     public void registerPlayer()
     {
         client.setPlayerName(playerName.text);

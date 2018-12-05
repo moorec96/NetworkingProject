@@ -1,4 +1,11 @@
-﻿using System.Collections;
+﻿/**
+ * Class: 
+ * Purpose: 
+ * Author: 
+ * Date: 
+ * */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -56,6 +63,12 @@ public class Lobby : MonoBehaviour {
         StartCoroutine(retrieveGameList());
     }
 
+    /**
+     * Method: 
+     * Purpose: 
+     * Parameters: 
+     * Return Val: 
+     * */
     IEnumerator retrieveGameList()
     {
         sock = SocketFactory.createSocket("localhost", 9999);
