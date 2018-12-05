@@ -21,6 +21,7 @@ public class Grid : MonoBehaviour {
     public Text[] buttonText;
     private Client client;
     public Button[] gridBtns;
+    public bool[] btnsSet;
     public PlayerMove oppMove;
     public Text gameOverText;
     public GameObject gameOverPanel;
@@ -95,7 +96,8 @@ public class Grid : MonoBehaviour {
             grid[x, y] = moveType;
             buttonText[index].text = "O";
         }
-        gridBtns[index].interactable = false;
+        //gridBtns[index].interactable = false;
+        btnsSet[index] = true;
     }
 
     /**
@@ -145,7 +147,10 @@ public class Grid : MonoBehaviour {
         {
             for (int i = 0; i < gridBtns.Length; i++)
             {
-                gridBtns[i].interactable = true;
+                if (!btnsSet[i])
+                {
+                    gridBtns[i].interactable = true;
+                }
             }
         }
     }
