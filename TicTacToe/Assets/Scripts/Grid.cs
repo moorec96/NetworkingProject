@@ -1,8 +1,8 @@
 ﻿/**
- * Class: 
- * Purpose: 
- * Author: 
- * Date: 
+ * Class: Grid  
+ * Purpose: Handles in-game moves and keeping track of tic-tac-toe grid
+ * Author: Caleb Moore
+ * Date: 12/04/2018
  * */
 
 using System.Collections;
@@ -26,6 +26,7 @@ public class Grid : MonoBehaviour {
     public GameObject gameOverPanel;
     public GameObject quitPanel;
 
+    //Find client object in hierarchy, and call getTurn
     private void Start()
     {
         client = GameObject.Find("ClientObj").GetComponent<Client>();
@@ -33,16 +34,16 @@ public class Grid : MonoBehaviour {
     }
 
     /**
-     * Method: 
-     * Purpose: 
-     * Parameters: 
-     * Return Val: 
+     * Method: getTurn
+     * Purpose: Asks the server whose turn it is 
+     * Parameters: N/A
+     * Return Val: N/A
      * */
     public void getTurn(){
-        client.youWon = false;
-        client.gameOver = false;
-        Socket sock = SocketFactory.createSocket("localhost", 9999);
-        string req = "GET /api/game?id=" + client.getGameID() + " HTTP/1.1\r\nHost: " + "localhost:9999\r\n\r\n";
+        client.youWon = false;                                  //Resets clients win status for new game
+        client.gameOver = false;                                //Resets clients game over status for new game
+        Socket sock = SocketFactory.createSocket("localhost", 9999);        //Initializes socket 
+        string req = "GET /api/game?id=" + client.getGameID() + " HTTP/1.1\r\nHost: " + "localhost:9999\r\n\r\n";       //Asks for current game info
         byte[] sockRequest = Encoding.ASCII.GetBytes(req);
         sock.Send(sockRequest);
 
@@ -51,21 +52,21 @@ public class Grid : MonoBehaviour {
         byte[] dataReceived = new byte[1024];
         do
         {
-            bytes = sock.Receive(dataReceived);
+            bytes = sock.Receive(dataReceived);                                 //Waits for response from server
             resp = resp + Encoding.ASCII.GetString(dataReceived, 0, bytes);
         }
         while (sock.Available > 0);
         print(resp);
-        int index = resp.IndexOf("\r\n\r\n");
+        int index = resp.IndexOf("\r\n\r\n");       //Finds location of the body of the header sent back from server
         index += 4;
         resp = resp.Substring(index);
-        ServerUpdate updList = JsonConvert.DeserializeObject<ServerUpdate>(resp);
-        if(updList.turn == client.getID()){
+        ServerUpdate updList = JsonConvert.DeserializeObject<ServerUpdate>(resp);       //Object that contains game data
+        if(updList.turn == client.getID()){                                             //If it is the local clients turn, then turn the grid on, and set the clients player num to 1
             toggleGrid(true);
             client.setPlayerNum(1);
             print("My turn");
         }
-        else{
+        else{                                                                           //If it is not the local clients turn, then turn the grid off, and set the clients number to 2
             toggleGrid(false);
             client.setPlayerNum(2);
             client.setIsTurn(false);
@@ -74,7 +75,12 @@ public class Grid : MonoBehaviour {
         sock.Close();
     }
 
-    // Use this for initialization
+    /**
+     * Method: fillGridSpace
+     * Purpose: Take in coordinates of last move, and display them on the grid
+     * Parameters:  playerNum -> player who just went, x and y -> coordinates
+     * Return Val: N/A
+     * */
     public void fillGridSpace(int playerNum, int x, int y)
     {
         int index = x * 3 == 0 ? y : x * 3 + y;
@@ -92,6 +98,12 @@ public class Grid : MonoBehaviour {
         gridBtns[index].interactable = false;
     }
 
+    /**
+     * Method: buttonClicked
+     * Purpose:  Gets coordinates of button just clicked on the board, calls fillGridSpace, calls convertToJson, and then toggles the grid
+     * Parameters: btnNum -> Number of button clicked
+     * Return Val: N/A
+     * */
     public void buttonClicked(int btnNum)
     {
         int x = btnNum / 3;
@@ -101,6 +113,12 @@ public class Grid : MonoBehaviour {
         toggleGrid(false);
     }
 
+    /**
+     * Method: convertToJson
+     * Purpose: Convert move into a PlayerMove object, convert to JSON, and then send to server
+     * Parameters: moveType -> either X or O, x and y -> coordinates
+     * Return Val: N/A
+     * */
     public void convertToJson(char moveType, int x, int y){
         PlayerMove newMove = new PlayerMove(x, y, moveType,client.getID(), client.getGameID());
         string jsonFile = JsonConvert.SerializeObject(newMove);
@@ -108,6 +126,12 @@ public class Grid : MonoBehaviour {
 
     }
 
+    /**
+     * Method: toggleGrid
+     * Purpose: Turns buttons off when it isn't the players turn so that they can't click on the board  
+     * Parameters: enable -> Whether or not the grid should be turned on
+     * Return Val: N/A
+     * */
     public void toggleGrid(bool enable)
     {
         if (!enable)
@@ -128,15 +152,15 @@ public class Grid : MonoBehaviour {
 
     public void Update()
     {
-        if (!client.getIsTurn())
+        if (!client.getIsTurn())        //If it isn't the players turn, wait for a response from the server 
         {
-            if(client.gameOver){
+            if(client.gameOver){            //If game over, then call gameWon()
                 gameWon(client.youWon);
             }
             int bytes = 0;
             byte[] receivedData = new byte[1024];
             string resp = "";
-            while (client.getSock().Available > 0)
+            while (client.getSock().Available > 0)      //Wait for a response from the server
             {
                 bytes = client.getSock().Receive(receivedData);
                 resp = resp + Encoding.ASCII.GetString(receivedData, 0, bytes);
@@ -144,13 +168,13 @@ public class Grid : MonoBehaviour {
                 print("TEST");
             }
             //print(resp);
-            if (client.getIsTurn())
-            {
-                if (resp.IndexOf("GAME_CANCELLED") > -1)
+            if (client.getIsTurn())                         //If client has received a messaage, continue
+            {   
+                if (resp.IndexOf("GAME_CANCELLED") > -1)    //If opponent has left, call gameCancelled
                 {
                     gameCancelled();
                 }
-                else if(resp.IndexOf("GAME_MOVE") > -1)
+                else if(resp.IndexOf("GAME_MOVE") > -1)     //Deserialize response into a PlayerMove, and display it on the grid.
                 {
                     print("RECEIVED MOVE");
                     oppMove = JsonConvert.DeserializeObject<PlayerMove>(resp);
@@ -176,6 +200,12 @@ public class Grid : MonoBehaviour {
         }
     }
 
+    /**
+     * Method: gameWon
+     * Purpose: Display to the screen the win status of the player
+     * Parameters: youWon -> Whether or not the player won the game
+     * Return Val: N/A 
+     * */
     public void gameWon(bool youWon){
         gameOverPanel.SetActive(true);
         if (youWon)
@@ -187,10 +217,22 @@ public class Grid : MonoBehaviour {
         }
     }
 
+    /**
+     * Method: gameCancelled
+     * Purpose: Display opponent quit panel
+     * Parameters:  N/A
+     * Return Val: N/A
+     * */
     public void gameCancelled(){
         quitPanel.SetActive(true);
     }
 
+    /**
+     * Method: leaveGame
+     * Purpose: Let the server know client is leaving game, and go back to Main Menu 
+     * Parameters: N/A
+     * Return Val: N/A
+     * */
     public void leaveGame(){
         Socket tempSock = SocketFactory.createSocket("localhost", 9999);
         string req = "DELETE /api/users?id=" + client.getID() + " HTTP/1.1\r\nHost: localhost:9999\r\n\r\n";

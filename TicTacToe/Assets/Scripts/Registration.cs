@@ -1,8 +1,8 @@
 ﻿/**
- * Class: 
- * Purpose: 
- * Author: 
- * Date: 
+ * Class: Registration
+ * Purpose: Take player name, and register with server to obtain a player ID
+ * Author: Caleb Moore
+ * Date: 12/04/2018
  * */
 
 using System.Collections;
@@ -25,8 +25,8 @@ public class Registration : MonoBehaviour {
 	}
 
     /**
-     * Method: 
-     * Purpose: 
+     * Method: registerPlayer
+     * Purpose: Take response from server, and set client ID to ID that was returned by the server
      * Parameters: 
      * Return Val: 
      * */
@@ -47,6 +47,12 @@ public class Registration : MonoBehaviour {
         this.gameObject.SetActive(false);
     }
 
+    /**
+    * Method: connectSocket
+    * Purpose: Connect socket to server, send player name, and wait for response containing player ID
+    * Parameters: server -> hostname of server to connect to, port -> port number to bind to socket
+    * Return Val: string -> HTTP response from server
+    * */
     private string connectSocket(string server, int port)
     {
         string body = "----------\r\nContent-Disposition: form-data; name=\"name\"\r\n\r\n" + client.getPlayerName() + "\r\n---------";

@@ -1,8 +1,8 @@
 /**
- * Class: 
- * Purpose: 
- * Author: 
- * Date: 
+ * Class: Socket Factory
+ * Purpose: Create sockets 
+ * Author: Caleb Moore
+ * Date: 12/4/2018
  * */
 
 using UnityEngine;
@@ -13,10 +13,10 @@ using System.Net.Sockets;
 public class SocketFactory
 {
     /**
-     * Method: 
-     * Purpose: 
-     * Parameters: 
-     * Return Val: 
+     * Method: createSocket
+     * Purpose: Create a socket and return it 
+     * Parameters: server -> host name to connect socket to, port -> port number to bind to socket
+     * Return Val: Socket object
      * */
     public static Socket createSocket(string server, int port){
         Socket sock = null;

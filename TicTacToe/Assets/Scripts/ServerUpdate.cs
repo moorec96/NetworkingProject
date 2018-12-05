@@ -1,8 +1,8 @@
 /**
- * Class: 
- * Purpose: 
- * Author: 
- * Date: 
+ * Class: ServerUpdate
+ * Purpose: Contains data about the current game data that can be serialized/desieralized to/from JSON format for communicating with the server
+ * Author: Caleb Moore
+ * Date: 12/04/2018
  * */
 
 using UnityEngine;
